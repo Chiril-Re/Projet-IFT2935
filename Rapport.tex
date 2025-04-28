@@ -1,0 +1,437 @@
+\documentclass[12pt]{article}
+\usepackage[french]{babel}
+\usepackage[T1]{fontenc}
+\usepackage{tikz}
+\usepackage{amsmath}
+\usetikzlibrary{er,positioning}
+
+\begin{document}
+
+\leftline{\bfseries Bases de données
+\hfill Hiver 2025}
+
+\noindent \hrulefill
+
+\leftline{IFT2935 \hfill Matricules : 20204930 / 20251962 / 20218631 /20248989  }
+\vspace{0.5cm}
+
+\centerline{\bfseries IFT 2935 PROJET } 
+\vspace{0.5cm}
+\centerline{Auteurs :  BATE Thomas, CHERNI Syrine, LE Andy et REABITCHI Chiril  }
+\noindent \hrulefill
+
+
+\hspace*{-2.5cm}
+\begin{tikzpicture}
+    [every entity/.style={fill=blue!20,draw=blue,thick},
+    every relationship/.style={fill=orange!20,draw=orange,thick,aspect=1.5},
+    every attribute/.style={fill=black!20,draw=black}]
+    %Livre
+    \node[entity,
+%        pin={[key attribute]86: Cote},
+%        pin={[key attribute]above left: No.Ex},
+        pin={[key attribute]below left: Auteur},
+        pin={[key attribute]-70: Titre},
+        pin={[attribute]left : Genre}
+        ](livre) at (-5,0) {Livre};
+
+    %Adhérant
+    \node[entity](adherant) at (5,0) {Adhérant};
+    %Attributes de l'adhérant
+    \node[key attribute,
+        pin={[attribute]160:No. Rue},
+        pin={[attribute]93:Rue},
+        pin={[attribute]60:ville},
+        pin={[attribute]10:Code Postal}
+    ](adresseAdherant) at (5,1.5) {Adresse}
+        edge (adherant);
+    \node[key attribute,
+        pin={[attribute]below left:Prénom},
+        pin={[attribute]below right: Nom de famille}
+        ](nom) at (5,-1.5) {Nom}
+        edge (adherant);
+%les associations
+    %Emprunt
+    \node[relationship,
+        pin={[key attribute]above: Date}
+    ](emprunt) at (0,2.5) {Emprunt}
+        edge node[pos=0.8, above] {0:1} node [pos=0.2, above] {1:1} (livre)
+        edge node[pos=0.8, above] {0:100} node [pos=0.2, above] {1:1}(adherant);
+    %Commande
+    \node[relationship,
+        pin={[attribute]below left: Statut},
+        pin={[key attribute]below right: Date}
+        ](commande) at (0,-2.5) {Commande}
+        edge node [pos=0.7, above] {0:1} node [pos=0.2,above] {1:1}(livre) 
+        edge node [pos=0.7, above] {0:3} node [pos=0.2, above] {1:1}(adherant);
+\end{tikzpicture}
+
+\hspace*{0cm} 
+Cela nous donne les relations suivantes:
+\begin{itemize}
+    \item Livre = (\textit{Titre,A\_Prénom,A\_Nom},Genre)\\
+    \item Adhérant = (\textit{Prénom,NomDeFamille,Us\_No.Rue,Us\_Rue,Us\_ville,Us\_postal\_code})\\
+    \item Commande = (\textit{\#Titre,\#A\_Prénom,\#A\_Nom,Date,\#Adherant},\text{Statut})\\
+    \item Emprunt=(\textit{\#Titre,\#A\_Prénom,\#A\_Nom,Date,\#Adherant})\\
+\end{itemize}
+
+Dans ce cas, on a mis autant de clés pour la relation, car il est fort possible d'avoir
+deux personnes ayant le même nom qui font partie de la bibliothèque. Par exemple, à UdeM,
+une recherche du nom Daniel Roy sur le site web d’UdeM nous donne deux résultats exacts.
+
+Il est aussi possible d'avoir deux livres identiques dans la même bibliothèque. Alors,
+même si on utilise titre et auteur comme clé, il est possible, surtout pour les livres de
+référence, ou des manuels scolaires, d'en avoir deux différents livres avec le même titre.
+Si la bibliothèque trouve qu'un livre est très sollicité, elle peut en acheter une autre
+exemplaire sans se soucier de sa base de données. 
+
+Une bonne idée pour préparer la base de données pour ce genre de situation est d'ajouter
+certaines autres informations sur le livre. UdeM utilise un code-barres pour identifier
+chaque livre dans sa base de données. Une autre façon d'identifier un livre d'une façon
+unique est d'utiliser la cote et le numéro d'exemplaire. Comme ça, la cote peut identifier
+le livre et le numéro d'exemplaire indique le document spécifique. Avec ces changements, 
+la base de données sera assez flexible pour pouvoir accepter plusieurs éditions ou 
+exemplaires de la même livre. 
+
+Alors, il serait mieux de faire cela : \\
+\hspace*{-2.5cm}
+\begin{tikzpicture}
+    [every entity/.style={fill=blue!20,draw=blue,thick},
+    every relationship/.style={fill=orange!20,draw=orange,thick,aspect=1.5},
+    every attribute/.style={fill=black!20,draw=black}]
+    %Livre
+    \node[entity,
+        pin={[key attribute]86: Cote},
+        pin={[key attribute]above left: No.Ex},
+        pin={[attribute]below left: Auteur},
+        pin={[attribute]-70: Titre},
+        pin={[attribute]left : Genre}
+        ](livre) at (-5,0) {Livre};
+
+    %Adhérant
+    \node[entity,
+        pin={[key attribute]right: ID\_Adhérant}
+        ](adherant) at (5,0) {Adhérant};
+    %Attributes de l'adhérant
+    \node[attribute,
+        pin={[attribute]160:No. Rue},
+        pin={[attribute]93:Rue},
+        pin={[attribute]60:ville},
+        pin={[attribute]10:Code Postal}
+    ](adresseAdherant) at (5,1.5) {Adresse}
+        edge (adherant);
+    \node[attribute,
+        pin={[attribute]below left:Prénom},
+        pin={[attribute]below right: Nom de famille}
+        ](nom) at (5,-1.5) {Nom}
+        edge (adherant);
+%les associations
+    %Emprunt
+    \node[relationship,
+        pin={[key attribute]above right: Date d'emprunt},
+        pin={[attribute]above left: Date de retour}
+    ](emprunt) at (0,2.5) {Emprunt}
+        edge node[pos=0.8, above] {0:1} node [pos=0.2, above] {1:1} (livre)
+        edge node[pos=0.8, above] {0:100} node [pos=0.2, above] {1:1}(adherant);
+    %Commande
+    \node[relationship,
+        pin={[attribute]below left: Statut},
+        pin={[key attribute]below right: Date}
+        ](commande) at (0,-2.5) {Commande}
+        edge node [pos=0.7, above] {0:1} node [pos=0.2,above] {1:1}(livre) 
+        edge node [pos=0.7, above] {0:3} node [pos=0.2, above] {1:1}(adherant);
+\end{tikzpicture}
+Cela nous donne à peu près les mêmes relations pour les entités, mais simplifie les
+relations pour les associations.
+
+On a donc les relations suivantes:
+\begin{itemize}
+    \item Livre = (\underline{No.Ex},\underline{Cote}, Genre, Auteur, Titre)
+    \item Adhérant = (\underline{ID\_Adhérant}, Adh\_No.Rue, Adh\_Rue, Adh\_ville,Adh\_codePostal,
+        Adh\_prenom,Adh\_nomDeFamille)
+    \item Commande = (\underline{\#Côte}, \underline{\#ID\_Adhérant}, \underline{Date}, Statut)
+    \item Emprunt = (\underline{\#N.Ex},\underline{\#Cote}, \underline{\#ID\_Adhérant}, \underline{Date d'emprunt}, Date de retour)
+\end{itemize}
+
+Il est possible de calculer plusieurs informations à partir de ces relations. Pour calculer le nombre de livres actuellement
+emprunté par un usager, il est possible de chercher dans la table d'emprunt pour trouver des livres qui correspond
+à son dossier. Pour savoir combien de livres sont en retard, on cherche des livres prêtés depuis plus que 14~jours. 
+À partir de ces informations, il est possible de calculer les frais de retard, et d'autres choses qui y sont liées.
+
+Pour les commandes, il est possible d'utiliser le statut et le nom d'utilisateur pour appliquer des règles d'intégrité
+qui empêche un usager de faire une commande s'il y en a déjà 3~actives dans la table des commandes. On n'utilise pas le no. exemplaire
+dans la table de commande parce que les commandes sont habituellement faites au niveau de titre au lieu de document. On peut
+refuser une commande s'il n'y a aucun exemplaire du livre disponible. 
+
+
+
+\section*{Dépendances Fonctionnelles \& Normalisation}
+
+Mainentant qu'on a le modèle EA et le modèle relationnel, on peut passer à la normalisation. 
+Pour ce faire, on commence d'abord par la définition des dépendances fonctionnelles pour chaque 
+relation dans le modèle relationnel. 
+
+\subsection*{\textbf{Livre} $=$ \underline{No.Ex, Cote}, Genre, Auteur, Titre}
+   
+\textbf{Dépendances fonctionnelles :} D'abord, nous allons établir que la cote du livre permet 
+d'identifier le genre, l'auteur et le titre du livre. 
+Donc, une première dépendance fonctionnelle qu'on peut définir est la suivante: \\ 
+\textbf{Cote $\rightarrow$ (Genre, Auteur, Titre)}. \\  \\
+De plus, puisqu'on peut différentier une copie d'un livre d'une autre avec la Cote et le No.Ex, 
+on peut aussi définir la dépendance fonctionnelle \\
+\textbf{(No.Ex, Cote) $\rightarrow$ (Genre, Auteur, Titre)}. \\
+\\
+\textbf{Normalisation :} D'abord, les attributs sont tous atomiques, donc la relation est en 1NF. 
+Cependant, la relation n'est pas en 2NF: On a la dépendance fonctionnelle \\
+\textbf{Cote $\rightarrow$ (Genre, Auteur, Titre)},\\
+qui ne respecte pas les règles de 2NF puisque \textbf{Cote} est seulement une partie de la clé \textbf{No. Ex, Cote} 
+et ne peut donc pas déterminer un attribut non clé. 
+
+Pour régler ce problème, on sépare la relation \textbf{Livre} en deux: 
+D'un côté, on aura la relation \textbf{Livre(Cote, Genre, Auteur, Titre)}, 
+où \textbf{Cote} déterminera \textbf{Genre}, \textbf{Auteur} et \textbf{Titre}. 
+De l'autre côté, on aura la relation \textbf{Exemplaire(No.Ex, Cote)}.  
+Dans les deux cas, les relations sont mainentant en 2NF. 
+
+De plus, il n’existe pas de dépendance transitive dans aucune des deux relations, donc les deux relations sont en 3NF. Finalement, Cote est une clé candidate, donc les deux relations sont aussi en BCNF. En conclusion, les relation \textbf{Livre} et \textbf{Exemplaire} sont mainenant normalisés.
+
+
+\subsection*{\textbf{Adhérant} $=$ \underline{ID\_Adhérant}, Adh\_No.Rue, Adh\_Rue, Adh\_ville, Adh\_codePostal, Adh\_prenom, Adh\_nomDeFamille}
+
+\textbf{Dépendances fonctionnelles :} Pour cette relation, on ne peut définir qu'une seule dépendance fonctionnelle, soit  \\ \\
+\textbf{ID\_Adhérant $\rightarrow$ (Adh\_No.Rue, Adh\_Rue, Adh\_ville, Adh\_codePostal, Adh\_prenom, Adh\_nomDeFamille)} \\  
+
+\textbf{Normalisation :} D'abord, les attributs sont tous atomiques, donc la relation est en 1NF. 
+Ensuite, tous les autres attributs sont déterminés par  \textbf{ID\_Adhérant}, donc la relation est en 2NF. 
+De plus, il n’existe pas de dépendance transitive, donc la relation est en 3NF. 
+Finalement, \textbf{ID\_Adhérant} est une clé candidate, donc la relation est aussi en BCNF. 
+En conclusion, la relation \textbf{Adhérant} est déjà normalisée.
+        
+
+\subsection*{\textbf{Commande} $=$ \underline{Cote, ID\_Adhérant, Date}, Statut}
+
+\textbf{Dépendances fonctionnelles :} Pour cette relation, on ne peut définir qu'une seule dépendance fonctionnelle. 
+Puisque Cote, ID\_Adhérant et Date forment la clé de la relation, on définit \\ 
+\textbf{(Cote, ID\_Adhérant, Date) $\rightarrow$ Statut}
+
+\textbf{Normalisation :} D'abord, les attributs sont tous atomiques, donc la relation est en 1NF. 
+Ensuite, Statut est uniquement déterminé  par  \textbf{Cote},\textbf{ ID\_Adhérant} et \textbf{Date}, 
+donc la relation est en 2NF. De plus, il n’existe pas de dépendance transitive, donc la relation est en 3NF. 
+Finalement, \textbf{Cote}, \textbf{ID\_Adhérant} et \textbf{Date} sont une clé candidate, 
+donc la relation est aussi en BCNF. En conclusion, la relation \textbf{Commande} est déjà normalisée.
+
+\subsection*{\textbf{Emprunt}$=$ \underline{No.Ex, Cote, ID\_Adhérant, Date d'emprunt}, Date de retour}
+
+\textbf{Dépendances fonctionnelles :} Pour cette relation, on ne peut définir qu'une seule dépendance fonctionnelle. Puisque 
+\textbf{No.Ex}, \textbf{Cote},\textbf{ ID\_Adhérant} et\textbf{ Date d'emprunt} forment la clé de la relation, 
+on définit \textbf{(No.Ex, Cote, ID\_Adhérant, Date d'emprunt) $\rightarrow$ Date de retour} 
+
+\textbf{Normalisation :} D'abord, les attributs sont tous atomiques, donc la relation est en 1NF. 
+Ensuite, Date de retour est uniquement déterminé  par  No.Ex, Cote, ID\_Adhérant et Date d'emprunt, 
+donc la relation est en 2NF. De plus, il n’existe pas de dépendance transitive, donc la relation est en 3NF. 
+Finalement, No.Ex, Cote, ID\_Adhérant et Date d'emprunt sont une clé candidate, donc la relation est aussi en BCNF. 
+En conclusion, la relation \textbf{Emprunt} est déjà normalisée.
+
+
+\section*{Schéma final de la base de données}
+
+\subsection*{Livre}
+\begin{itemize}
+    \item \textbf{Attributs} : Cote, Genre, Auteur, Titre
+    \item \textbf{Clé candidate} : Cote
+    \item \textbf{Dépendance fonctionnelle} : \( \text{Cote} \rightarrow (\text{Genre}, \text{Auteur}, \text{Titre}) \)
+\end{itemize}
+
+\subsection*{Exemplaire}
+\begin{itemize}
+    \item \textbf{Attributs} : No.Ex, Cote
+    \item \textbf{Clé candidate} : (No.Ex, Cote)
+\end{itemize}
+
+\subsection*{Adhérant}
+\begin{itemize}
+    \item \textbf{Attributs} : ID\_Adhérant, Adh\_No.Rue, Adh\_Rue, Adh\_ville, Adh\_codePostal, Adh\_prenom, Adh\_nomDeFamille
+    \item \textbf{Clé candidate} : ID\_Adhérant
+    \item \textbf{Dépendance fonctionnelle} : \\
+        \( \text{ID\_Adhérant} \rightarrow (\text{Adh\_No.Rue}, \text{Adh\_Rue}, \text{Adh\_ville},\)\\ \( \text{Adh\_codePostal}, \text{Adh\_prenom}, \text{Adh\_nomDeFamille}) \)
+\end{itemize}
+
+\subsection*{Commande}
+\begin{itemize}
+    \item \textbf{Attributs} : Cote, ID\_Adhérant, Date, Statut
+    \item \textbf{Clé candidate} : (Cote, ID\_Adhérant, Date)
+    \item \textbf{Dépendance fonctionnelle} : \( (\text{Cote}, \text{ID\_Adhérant}, \text{Date}) \rightarrow \text{Statut} \)
+\end{itemize}
+
+\subsection*{Emprunt}
+\begin{itemize}
+    \item \textbf{Attributs} : No.Ex, Cote, ID\_Adhérant, Date d’emprunt, Date de retour
+    \item \textbf{Clé candidate} : (No.Ex, Cote, ID\_Adhérant, Date d’emprunt)
+    \item \textbf{Dépendance fonctionnelle} : \( (\text{No.Ex}, \text{Cote}, \text{ID\_Adhérant}, \text{Date d’emprunt}) \rightarrow \text{Date de retour} \)
+\end{itemize}
+
+\section*{Implémentation}
+Tout d’abord, j’ai commencé par supprimer les tables existantes afin de partir d’une base propre, ce qui m’a permis d’éviter tout conflit ou erreur potentielle avec des potentiells anciennes structures de données. 
+
+Ensuite, j’ai créé chacune des tables en suivant le schéma établi, en définissant correctement les clés primaires et en implémentant les contraintes de clés étrangères nécessaires . 
+
+Finalement, j’ai rempli chaque table avec plus de dix tuples, en utilisant des noms simples pour faciliter les tests et la compréhension, commme « Auteur A », « Titre 1 »,  « rue 1ere » et « avenue 2e ». 
+
+
+\section*{Question/Réponse}
+À noter que les réponses SQL sont disponibles dans le document Implementation.sql.
+
+\subsection*{Question 1 : Quel est le nombre total d’emprunts, le genre le plus emprunté et la moyenne d'emprunt par adhérent, pour chaque ville ?}
+
+\textbf{Algèbre relationnelle :}
+\[
+\begin{aligned}
+  &r_1 \leftarrow \pi_{\text{ID\_Adhérant, Adh\_ville}}(\text{Adhérant}) \\
+  &r_2 \leftarrow \pi_{\text{ID\_Adhérant, Cote}}(\text{Emprunt}) \\
+  &r_3 \leftarrow r_1 \bowtie r_2 \\
+  &r_4 \leftarrow \text{Adh\_ville} \mathcal{A}_{\text{count(*)}, \text{max(Genre)}} (\pi_{\text{Adh\_ville, Genre}}(r_3 \bowtie \text{Livre})) \\
+  &r_5 \leftarrow \text{Adh\_ville} \mathcal{A}_{\text{count(distinct ID\_Adhérant)}}(\text{Adhérant}) \\
+  &\text{Résultat} \leftarrow \rho_{\text{Ville, Nb\_Emprunts, Genre\_Plus\_Emprunté, Moyenne}}(r_4 \bowtie r_5)
+\end{aligned}
+\]
+
+\textbf{Optimisation :}  
+On applique d’abord les projections pour réduire les données à traiter. Les jointures naturelles évitent les produits cartésiens. Les agrégats sont calculés après avoir joint avec Livre, ce qui limite le traitement aux données utiles. La dernière jointure est efficace grâce aux clés primaires.
+
+\subsection*{Question 2 : Quels adhérents ont atteint leur limite de commande (3 commandes actives non annulées) ?}
+
+\textbf{Algèbre relationnelle :}
+\[
+\begin{aligned}
+  &r_1 \leftarrow \sigma_{\text{Statut} \neq \text{'Annulée'}}(\text{Commande}) \\
+  &r_2 \leftarrow \text{ID\_Adhérant} \mathcal{A}_{\text{count(*)}} (\pi_{\text{ID\_Adhérant}}(r_1)) \\
+  &\text{Résultat} \leftarrow \pi_{\text{adh\_prenom, adh\_nomDeFamille}} (\sigma_{\text{count} \geq 3} (r_2 \bowtie \text{Adhérant}))
+\end{aligned}
+\]
+
+\textbf{Optimisation :} 
+On filtre directement les commandes annulées pour alléger la suite. Le regroupement par \textit{ID\_Adhérant} se fait avant la jointure, ce qui évite de travailler sur des données inutiles. L’agrégat count est ainsi plus rapide.
+
+\subsection*{Question 3 : Quels sont le genre de livres le plus emprunté et son nombre d’emprunts ?}
+
+\textbf{Algèbre relationnelle :}
+\[
+\begin{aligned}
+  &r_1 \leftarrow \pi_{\text{Cote}}(\text{Emprunt}) \\
+  &r_2 \leftarrow \pi_{\text{Cote, Genre}}(\text{Livre}) \\
+  &r_3 \leftarrow \text{Genre} \mathcal{A}_{\text{count(*) as nb\_emprunts}} (r_1 \bowtie r_2) \\
+  &\text{Résultat} \leftarrow \sigma_{\text{nb\_emprunts} = \max(\text{nb\_emprunts})} (r_3)
+\end{aligned}
+\]
+
+\textbf{Optimisation :}  
+La jointure se fait uniquement sur Cote et Genre pour rester léger. Le max est calculé juste après l’agrégation, sans passer par une sous-requête. L’index sur Cote rend la jointure plus rapide.
+
+
+\subsection*{Question 4 : Quels sont les livres dont tous les exemplaires sont empruntés, et qui sont leurs emprunteurs ?}
+
+\textbf{Algèbre relationnelle :}
+\[
+\begin{aligned}
+  &r_1 \leftarrow \pi_{\text{No.Ex, Cote}}(\text{Exemplaire}) \\
+  &r_2 \leftarrow \pi_{\text{No.Ex, Cote}} (\sigma_{\text{date\_retour} \geq \text{current\_date}} (\text{Emprunt})) \\
+  &r_3 \leftarrow r_1 - r_2 \\
+  &\text{Livres\_indisponibles} \leftarrow \pi_{\text{Cote}} (\text{Exemplaire}) - \pi_{\text{Cote}} (r_3) \\
+  &\text{Résultat} \leftarrow \pi_{\text{Titre, adh\_prenom, adh\_nomDeFamille, date\_retour}} \\
+  &\quad (\text{Livres\_indisponibles} \bowtie \text{Livre} \bowtie \text{Emprunt} \bowtie \text{Adhérant})
+\end{aligned}
+\]
+
+\textbf{Optimisation :}  
+On utilise la différence d’ensembles pour isoler les exemplaires encore empruntés. Les jointures ne se font que sur les Cote concernés, et la projection finale garde seulement ce qu’il faut. L’index sur \textit{date\_retour} aide à cibler les emprunts actifs.
+
+\section{Développement [Langage au choix] (20\%)}
+
+\subsection{Choix du langage et technologies utilisées}
+
+Pour le développement de l'application graphique, nous avons choisi d'utiliser :
+
+\begin{itemize}
+    \item Java (langage principal)
+    \item JavaFX pour l'interface graphique
+    \item Hibernate ORM pour interagir avec la base de données PostgreSQL
+    \item PostgreSQL comme système de gestion de base de données relationnelle
+\end{itemize}
+
+Le tout a été développé sous IntelliJ IDEA avec Maven pour la gestion des dépendances.
+
+\subsection{Étapes de la création de l'application}
+
+\begin{enumerate}
+    \item \textbf{Configuration initiale du projet}
+    \begin{itemize}
+        \item Création d'un projet Maven dans IntelliJ IDEA.
+        \item Ajout des dépendances nécessaires dans \texttt{pom.xml} :
+        \begin{itemize}
+            \item org.hibernate:hibernate-core
+            \item org.postgresql:postgresql
+            \item org.openjfx:javafx-controls, javafx-fxml
+        \end{itemize}
+        \item Création du fichier \texttt{hibernate.cfg.xml} pour configurer l'accès à la base de données PostgreSQL.
+    \end{itemize}
+
+    \item \textbf{Construction de l'interface graphique (JavaFX)}
+    \begin{itemize}
+        \item Utilisation de \texttt{VBox} pour organiser les composants verticalement.
+        \item Création d'une scène principale (\texttt{MainMenu.java}) avec 4 boutons :
+        \begin{itemize}
+            \item Chaque bouton correspond à une question parmi les 4 de l'étape 5.
+        \end{itemize}
+        \item Mise en place d'un gestionnaire d'événements (\texttt{SceneLoader.java}) :
+        \begin{itemize}
+            \item Chaque bouton charge une nouvelle scène contenant la réponse à la question sélectionnée.
+        \end{itemize}
+    \end{itemize}
+
+    \item \textbf{Exécution des requêtes SQL}
+    \begin{itemize}
+        \item Création d'une classe \texttt{ExecuterRequete.java} pour :
+        \begin{itemize}
+            \item Recevoir une requête SQL sous forme de String.
+            \item L'exécuter via une session Hibernate.
+            \item Récupérer et formater les résultats pour affichage.
+        \end{itemize}
+        \item Utilisation de requêtes SQL natives (pas HQL) pour conserver la syntaxe exacte demandée.
+    \end{itemize}
+
+    \item \textbf{Gestion de l'affichage des résultats}
+    \begin{itemize}
+        \item Formatage manuel des résultats (\texttt{ExecuterRequete.java}) :
+        \begin{itemize}
+            \item Chaque colonne est alignée proprement pour un affichage clair.
+        \end{itemize}
+        \item Ajout d'un bouton "Retour" sur chaque page de résultats pour revenir au menu principal.
+    \end{itemize}
+
+    \item \textbf{Compilation et génération du projet}
+    \begin{itemize}
+        \item Génération d'un fichier \texttt{.jar} autonome via IntelliJ (Build Artifacts).
+        \item Support de JavaFX au runtime en ajoutant les options \texttt{--module-path} et \texttt{--add-modules} lors de l'exécution.
+        \item Vérification que l'application fonctionne avec PostgreSQL et JavaFX hors IntelliJ via terminal.
+    \end{itemize}
+\end{enumerate}
+
+\subsection{Fonctionnalités principales de l'application}
+
+\begin{itemize}
+    \item 4 boutons correspondant chacun à une question de l'étape 5.
+    \item Chaque bouton charge dynamiquement la réponse associée depuis la base de données.
+    \item Résultats affichés dans une interface simple, propre et lisible.
+    \item Bouton "Retour" pour revenir au menu principal.
+\end{itemize}
+
+\subsection{Remarques}
+
+\begin{itemize}
+    \item L'extension PostgreSQL \texttt{tablefunc} a été activée pour permettre l'utilisation de la fonction \texttt{mode()} dans certaines requêtes.
+\end{itemize}
+
+\end{document}
+
+
+
