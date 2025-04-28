@@ -193,7 +193,9 @@ où \textbf{Cote} déterminera \textbf{Genre}, \textbf{Auteur} et \textbf{Titre}
 De l'autre côté, on aura la relation \textbf{Exemplaire(No.Ex, Cote)}.  
 Dans les deux cas, les relations sont mainentant en 2NF. 
 
-De plus, il n’existe pas de dépendance transitive dans aucune des deux relations, donc les deux relations sont en 3NF. Finalement, Cote est une clé candidate, donc les deux relations sont aussi en BCNF. En conclusion, les relation \textbf{Livre} et \textbf{Exemplaire} sont mainenant normalisés.
+De plus, il n’existe pas de dépendance transitive dans aucune des deux relations, donc les deux relations sont en 3NF.
+Finalement, Cote est une clé candidate, donc les deux relations sont aussi en BCNF.
+En conclusion, les relation \textbf{Livre} et \textbf{Exemplaire} sont mainenant normalisés.
 
 
 \subsection*{\textbf{Adhérant} $=$ \underline{ID\_Adhérant}, Adh\_No.Rue, Adh\_Rue, Adh\_ville, Adh\_codePostal, Adh\_prenom, Adh\_nomDeFamille}
@@ -271,17 +273,21 @@ En conclusion, la relation \textbf{Emprunt} est déjà normalisée.
 \end{itemize}
 
 \section*{Implémentation}
-Tout d’abord, j’ai commencé par supprimer les tables existantes afin de partir d’une base propre, ce qui m’a permis d’éviter tout conflit ou erreur potentielle avec des potentiells anciennes structures de données. 
+Tout d’abord, j’ai commencé par supprimer les tables existantes afin de partir d’une base propre, ce qui m’a permis
+d’éviter tout conflit ou erreur potentielle avec des potentiells anciennes structures de données.
 
-Ensuite, j’ai créé chacune des tables en suivant le schéma établi, en définissant correctement les clés primaires et en implémentant les contraintes de clés étrangères nécessaires . 
+Ensuite, j’ai créé chacune des tables en suivant le schéma établi, en définissant correctement les clés primaires et en
+implémentant les contraintes de clés étrangères nécessaires .
 
-Finalement, j’ai rempli chaque table avec plus de dix tuples, en utilisant des noms simples pour faciliter les tests et la compréhension, commme « Auteur A », « Titre 1 »,  « rue 1ere » et « avenue 2e ». 
+Finalement, j’ai rempli chaque table avec plus de dix tuples, en utilisant des noms simples pour faciliter les tests et
+la compréhension, commme « Auteur A », « Titre 1 »,  « rue 1ere » et « avenue 2e ».
 
 
 \section*{Question/Réponse}
 À noter que les réponses SQL sont disponibles dans le document Implementation.sql.
 
-\subsection*{Question 1 : Quel est le nombre total d’emprunts, le genre le plus emprunté et la moyenne d'emprunt par adhérent, pour chaque ville ?}
+\subsection*{Question 1 : Quel est le nombre total d’emprunts, le genre le plus emprunté et la moyenne d'emprunt par
+adhérent, pour chaque ville ?}
 
 \textbf{Algèbre relationnelle :}
 \[
@@ -296,7 +302,9 @@ Finalement, j’ai rempli chaque table avec plus de dix tuples, en utilisant des
 \]
 
 \textbf{Optimisation :}  
-On applique d’abord les projections pour réduire les données à traiter. Les jointures naturelles évitent les produits cartésiens. Les agrégats sont calculés après avoir joint avec Livre, ce qui limite le traitement aux données utiles. La dernière jointure est efficace grâce aux clés primaires.
+On applique d’abord les projections pour réduire les données à traiter. Les jointures naturelles évitent les produits
+cartésiens. Les agrégats sont calculés après avoir joint avec Livre, ce qui limite le traitement aux données utiles.
+La dernière jointure est efficace grâce aux clés primaires.
 
 \subsection*{Question 2 : Quels adhérents ont atteint leur limite de commande (3 commandes actives non annulées) ?}
 
@@ -310,7 +318,8 @@ On applique d’abord les projections pour réduire les données à traiter. Les
 \]
 
 \textbf{Optimisation :} 
-On filtre directement les commandes annulées pour alléger la suite. Le regroupement par \textit{ID\_Adhérant} se fait avant la jointure, ce qui évite de travailler sur des données inutiles. L’agrégat count est ainsi plus rapide.
+On filtre directement les commandes annulées pour alléger la suite. Le regroupement par \textit{ID\_Adhérant} se fait
+avant la jointure, ce qui évite de travailler sur des données inutiles. L’agrégat count est ainsi plus rapide.
 
 \subsection*{Question 3 : Quels sont le genre de livres le plus emprunté et son nombre d’emprunts ?}
 
@@ -325,7 +334,8 @@ On filtre directement les commandes annulées pour alléger la suite. Le regroup
 \]
 
 \textbf{Optimisation :}  
-La jointure se fait uniquement sur Cote et Genre pour rester léger. Le max est calculé juste après l’agrégation, sans passer par une sous-requête. L’index sur Cote rend la jointure plus rapide.
+La jointure se fait uniquement sur Cote et Genre pour rester léger. Le max est calculé juste après l’agrégation,
+sans passer par une sous-requête. L’index sur Cote rend la jointure plus rapide.
 
 
 \subsection*{Question 4 : Quels sont les livres dont tous les exemplaires sont empruntés, et qui sont leurs emprunteurs ?}
@@ -343,7 +353,9 @@ La jointure se fait uniquement sur Cote et Genre pour rester léger. Le max est 
 \]
 
 \textbf{Optimisation :}  
-On utilise la différence d’ensembles pour isoler les exemplaires encore empruntés. Les jointures ne se font que sur les Cote concernés, et la projection finale garde seulement ce qu’il faut. L’index sur \textit{date\_retour} aide à cibler les emprunts actifs.
+On utilise la différence d’ensembles pour isoler les exemplaires encore empruntés.
+Les jointures ne se font que sur les Cote concernés, et la projection finale garde seulement ce qu’il faut.
+L’index sur \textit{date\_retour} aide à cibler les emprunts actifs.
 
 \section{Développement [Langage au choix] (20\%)}
 
